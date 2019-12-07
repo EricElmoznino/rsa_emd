@@ -1,6 +1,4 @@
 import sys
-import os
-import shutil
 import numpy as np
 import ot
 from tqdm import tqdm
@@ -20,6 +18,7 @@ def pairwise_distances(feats, mask, metric='emd'):
 
     d = [[f(feats[i], feats[j], mask)
           for i in range(len(feats))] for j in tqdm(range(len(feats)))]
+    d = np.array(d)
     return d
 
 
@@ -71,8 +70,8 @@ def corrinv(feats_i, feats_j, mask):
 
 if __name__ == '__main__':
     assert len(sys.argv) == 2
-
     subj = int(sys.argv[1])
+
     brain, mask = read_subject(subj)
 
     # Mean within-category activities
@@ -83,11 +82,6 @@ if __name__ == '__main__':
         mean_brain.append(np.mean(brain[start:end], axis=0))
 
     for metric in ['emd', 'euclidean', 'corrinv']:
-        shutil.rmtree('results/s{:02d}/{}'.format(subj, metric), ignore_errors=True)
-        os.mkdir('results/s{:02d}/{}'.format(subj, metric))
-
         mean_d = pairwise_distances(mean_brain, mask, metric)
-        np.save('results/s{:02d}/{}/mean_rdm.npy'.format(subj, metric), mean_d)
-
         d = pairwise_distances(brain, mask, metric)
-        np.save('results/s{:02d}/{}/rdm.npy'.format(subj, metric), d)
+        np.savez('results/s{:02d}/{}_rdm.npz'.format(subj, metric), mean=mean_d, runs=d)
