@@ -21,6 +21,7 @@ def plot_permutation_test(r, p, random_dist):
 
 
 def plot_compare_dists(dist1, dist2, name1, name2):
+    # Two overlaid distributions on the same plot
     plt.hist(dist1, bins=40, density=True, alpha=0.5, color='b', label=name1)
     plt.hist(dist2, bins=40, density=True, alpha=0.5, color='r', label=name2)
     plt.legend()

@@ -6,7 +6,16 @@ from data_processing import *
 
 
 def pairwise_distances(feats, mask, metric='emd'):
+    """
+    Creates a matrix of the pairwise distances between a list of brain patterns masked to an ROI
+    :param feats: List of brain patterns for different stimuli and/or runs
+    :param mask: Binary mask for a given ROI
+    :param metric: What distance metric to use in order to compare brain patterns across conditions
+    :return: (ndarray) matrix containing the distances between each pair of brain patterns
+    """
     print('Computing pairwise distances with metric: {}'.format(metric))
+
+    # Select the appropriate distance function to use between brain patterns
     if metric == 'emd':
         f = emd
     elif metric == 'euclidean':
@@ -16,6 +25,7 @@ def pairwise_distances(feats, mask, metric='emd'):
     else:
         raise NotImplementedError('Unimplemented distance metric: {}'.format(metric))
 
+    # Apply the distance metric between each pair of features
     d = [[f(feats[i], feats[j], mask)
           for i in range(len(feats))] for j in tqdm(range(len(feats)))]
     d = np.array(d)
@@ -82,6 +92,6 @@ if __name__ == '__main__':
         mean_brain.append(np.mean(brain[start:end], axis=0))
 
     for metric in ['emd', 'euclidean', 'corrinv']:
-        mean_d = pairwise_distances(mean_brain, mask, metric)
-        d = pairwise_distances(brain, mask, metric)
-        np.savez('results/s{:02d}/{}_rdm.npz'.format(subj, metric), mean=mean_d, runs=d)
+        mean_d = pairwise_distances(mean_brain, mask, metric)   # RDM for mean patterns across all runs of the stimuli
+        d = pairwise_distances(brain, mask, metric)             # RDM for all stimuli across all runs
+        np.savez('results/s{:02d}/{}_rdm.npz'.format(subj, metric), mean=mean_d, runs=d)    # Save RDMs
